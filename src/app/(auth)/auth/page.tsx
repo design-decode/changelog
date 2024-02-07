@@ -1,4 +1,16 @@
+'use client';
+
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
+const supabase = createPagesBrowserClient();
+
 const AuthPage = () => {
+	async function signInWithGithub() {
+		await supabase.auth.signInWithOAuth({
+			provider: 'github',
+			options: { redirectTo: 'http://localhost:3000/setup' }
+		});
+	}
+
 	return (
 		<main className="flex flex-col justify-center items-center mt-[200px] max-w-[281px] mx-auto text-center gap-space-6">
 			<div>
@@ -6,8 +18,8 @@ const AuthPage = () => {
 				<p className="text-slate-11 text-1 mt-space-1">Get started with making your Github product log even prettier.</p>
 			</div>
 
-			<button className="flex items-center border border-slate-7 rounded-2 px-space-2 h-8 w-fit gap-space-2">
-				<svg width="16" height="16" viewBox="0 0 16 16" className="fill-slate-11" xmlns="http://www.w3.org/2000/svg">
+			<button onClick={() => signInWithGithub()} className="flex items-center border border-slate-7 rounded-2 px-space-2 h-8 w-fit gap-space-2">
+				<svg width="16" height="16" viewBox="0 0 16 16" className="fill-slate-12" xmlns="http://www.w3.org/2000/svg">
 					<rect width="16" height="16" fillOpacity="0.01" />
 					<path
 						fillRule="evenodd"
@@ -16,7 +28,7 @@ const AuthPage = () => {
 						fillOpacity="0.797"
 					/>
 				</svg>
-				<div className="text-slate-11 text-2">Get started with Github</div>
+				<div className="text-slate-12 text-2">Get started with Github</div>
 			</button>
 		</main>
 	);

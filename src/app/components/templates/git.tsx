@@ -3,13 +3,14 @@ import SampleImage from '../../../../public/img/sample1.png';
 import Avatar from '../../../../public/img/avatar.png';
 import Link from 'next/link';
 import Tag from '../tag';
+import { HTMLAttributes } from 'react';
 
-export default function GitTemplate() {
+const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: any }) => {
 	return (
-		<div className="flex gap-space-7 w-full">
+		<div {...props} className="flex gap-space-7 w-full">
 			<div className="text-2 font-regular w-[88px] sticky top-0 flex flex-col gap-space-4">
-				<div className=" text-slate-11">May 17, 2023</div>
-				<div className="text-slate-10">v0.3.5</div>
+				<div className=" text-slate-11">{data.published_at}</div>
+				<div className="text-slate-10">{data.tag_name}</div>
 				<div className="text-indigoA-11 flex items-center gap-space-1">
 					<svg width="16" height="8" viewBox="0 0 16 8" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path
@@ -24,15 +25,15 @@ export default function GitTemplate() {
 				<div className="text-indigoA-11 flex items-center gap-space-1">
 					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M3.33334 5.3335C4.43791 5.3335 5.33334 4.43807 5.33334 3.3335C5.33334 2.22893 4.43791 1.3335 3.33334 1.3335C2.22877 1.3335 1.33334 2.22893 1.33334 3.3335C1.33334 4.43807 2.22877 5.3335 3.33334 5.3335Z" fill="#99A2FF" />
-						<path d="M12.6667 10C13.7712 10 14.6667 9.10457 14.6667 8C14.6667 6.89543 13.7712 6 12.6667 6C11.5621 6 10.6667 6.89543 10.6667 8C10.6667 9.10457 11.5621 10 12.6667 10Z" stroke="#99A2FF" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" />
+						<path d="M12.6667 10C13.7712 10 14.6667 9.10457 14.6667 8C14.6667 6.89543 13.7712 6 12.6667 6C11.5621 6 10.6667 6.89543 10.6667 8C10.6667 9.10457 11.5621 10 12.6667 10Z" stroke="#99A2FF" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
 						<path
 							d="M3.33334 14.6665C4.43791 14.6665 5.33334 13.7711 5.33334 12.6665C5.33334 11.5619 4.43791 10.6665 3.33334 10.6665C2.22877 10.6665 1.33334 11.5619 1.33334 12.6665C1.33334 13.7711 2.22877 14.6665 3.33334 14.6665Z"
 							stroke="#99A2FF"
-							stroke-width="0.8"
-							stroke-linecap="round"
-							stroke-linejoin="round"
+							strokeWidth="0.8"
+							strokeLinecap="round"
+							strokeLinejoin="round"
 						/>
-						<path d="M10.6667 8.00016H6.00001C4.53334 8.00016 3.33334 7.3335 3.33334 5.3335V10.6668" stroke="#99A2FF" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" />
+						<path d="M10.6667 8.00016H6.00001C4.53334 8.00016 3.33334 7.3335 3.33334 5.3335V10.6668" stroke="#99A2FF" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
 					</svg>
 					v1.3.2
 				</div>
@@ -89,4 +90,6 @@ export default function GitTemplate() {
 			</div>
 		</div>
 	);
-}
+};
+
+export { GitTemplate };

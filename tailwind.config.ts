@@ -16,7 +16,7 @@ const spacingVariable = {
 const config: Config = {
 	darkMode: 'media',
 	presets: [radixThemePreset],
-	safelist: ['bg-greenA-3', 'text-greenA-11', 'bg-redA-3', 'text-redA-11', 'stroke-redA-11', 'stroke-greenA-11'],
+	safelist: ['bg-greenA-3', 'text-greenA-11', 'bg-redA-3', 'text-redA-11', 'stroke-redA-11', 'stroke-greenA-11', 'bg-indigoA-3'],
 	content: ['./src/pages/**/*.{js,ts,jsx,tsx,mdx}', './src/components/**/*.{js,ts,jsx,tsx,mdx}', './src/app/**/*.{js,ts,jsx,tsx,mdx}'],
 	theme: {
 		extend: {

@@ -1,6 +1,34 @@
+'use client';
+
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+
+const supabase = createPagesBrowserClient();
+
 const Header = () => {
+	const searchParams = useSearchParams();
+	const [userRepos, setUserRepos] = useState<any[]>([]);
+	const [activeRepoId, setRepoId] = useState(searchParams.get('repoId'));
+
+	const userSupabaseRepos = useCallback(async () => {
+		const { data } = await supabase.from('repos').select();
+		if (data) setUserRepos(data);
+		return data;
+	}, []);
+
+	const signout = async () => {
+		return await supabase.auth.signOut().then(() => (location.href = `${location.origin}/auth`));
+	};
+
+	useEffect(() => {
+		userSupabaseRepos();
+		setRepoId(searchParams.get('repoId'));
+	}, [searchParams, userSupabaseRepos]);
+
 	return (
-		<header className="fixed h-full left-0 top-0 maxW-[76px] mx-auto pr-[1px] bg-[linear-gradient(180deg,rgba(212,214,215,0.43),rgba(212,214,215,0)_12%),linear-gradient(0deg,rgba(212,214,215,0.43),rgba(212,214,215,0)_12%)] bg-slate-2">
+		<header className="fixed h-full left-0 top-0 maxW-[76px] mx-auto pr-[1px] bg-[linear-gradient(180deg,rgba(212,214,215,0.43),rgba(212,214,215,0)_12%),linear-gradient(0deg,rgba(212,214,215,0.43),rgba(212,214,215,0)_12%)] bg-slate-2 z-20">
 			<div className="h-full flex items-center flex-col justify-between bg-slate-2 py-space-5">
 				<div>
 					<svg width="44" height="32" viewBox="0 0 44 32" className="fill-indigo-12" xmlns="http://www.w3.org/2000/svg">
@@ -9,7 +37,7 @@ const Header = () => {
 				</div>
 
 				<div className="flex flex-col gap-space-5">
-					<button className="px-space-4 border-r border-r-slate-11">
+					<button className="px-space-4 border-r border-r-slate-11 relative group/button">
 						<svg width="24" height="25" viewBox="0 0 24 25" className="stroke-slate-11" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path
 								d="M21 7.92755V17.9276C21 20.9276 19.5 22.9276 16 22.9276H8C4.5 22.9276 3 20.9276 3 17.9276V7.92755C3 4.92755 4.5 2.92755 8 2.92755H16C19.5 2.92755 21 4.92755 21 7.92755Z"
@@ -22,6 +50,48 @@ const Header = () => {
 							<path d="M8 13.9276H12" stroke="#ADB1B8" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
 							<path d="M8 17.9276H16" stroke="#ADB1B8" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
 						</svg>
+
+						<ul className="transition-all absolute -right-36 rounded-3 top-0 bg-slate-2 shadow-1 border border-slate-4 opacity-0 -translate-x-1 pointer-events-none group-focus-within/button:opacity-100 group-focus-within/button:translate-x-0 group-focus-within/button:pointer-events-auto group-hover/button:opacity-100 group-hover/button:translate-x-0 group-hover/button:pointer-events-auto">
+							{userRepos.map((repo, index) => (
+								<li className={`hover:bg-slate-3 transition-all duration-500 ${activeRepoId == repo.id ? 'bg-slate-3' : ''}`} key={index}>
+									<Link href={`./?repoId=${repo.id}`} className="w-full text-left py-space-2 px-space-2 text-1 text-slate-11 flex justify-between items-center group capitalize">
+										{repo.name}
+										<svg
+											width="24"
+											height="24"
+											viewBox="0 0 24 24"
+											className={`stroke-slate-11 scale-50 fill-transparent opacity-0 -translate-x-1 transition-all ${activeRepoId == repo.id ? '' : 'group-hover:opacity-100 group-hover:translate-x-0 group-focus:opacity-100 group-focus:translate-x-0'}`}
+											xmlns="http://www.w3.org/2000/svg">
+											<path
+												d="M4 12.0004V8.44038C4 4.02038 7.13 2.21038 10.96 4.42038L14.05 6.20038L17.14 7.98038C20.97 10.1904 20.97 13.8104 17.14 16.0204L14.05 17.8004L10.96 19.5804C7.13 21.7904 4 19.9804 4 15.5604V12.0004Z"
+												strokeWidth="1"
+												strokeMiterlimit="10"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											/>
+										</svg>
+									</Link>
+								</li>
+							))}
+
+							<li className="bg-slate-4 group hover:bg-slate-5">
+								<Link href={'/setup'} className="w-full text-left py-space-2 px-space-2 text-1 text-slate-11 group-hover:text-slate-12 flex items-center">
+									Connect New Repo
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="scale-50 stroke-slate-11 ml-space-1" xmlns="http://www.w3.org/2000/svg">
+										<path d="M22 6V8.42C22 10 21 11 19.42 11H16V4.01C16 2.9 16.91 2 18.02 2C19.11 2.01 20.11 2.45 20.83 3.17C21.55 3.9 22 4.9 22 6Z" strokeWidth="1" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+										<path
+											d="M2 7V21C2 21.83 2.94001 22.3 3.60001 21.8L5.31 20.52C5.71 20.22 6.27 20.26 6.63 20.62L8.28999 22.29C8.67999 22.68 9.32001 22.68 9.71001 22.29L11.39 20.61C11.74 20.26 12.3 20.22 12.69 20.52L14.4 21.8C15.06 22.29 16 21.82 16 21V4C16 2.9 16.9 2 18 2H7H6C3 2 2 3.79 2 6V7Z"
+											strokeWidth="1"
+											strokeMiterlimit="10"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										/>
+										<path d="M6.25 10H11.75" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+										<path d="M9 12.75V7.25" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+									</svg>
+								</Link>
+							</li>
+						</ul>
 					</button>
 
 					<button className=" px-space-4">
@@ -43,7 +113,8 @@ const Header = () => {
 					</button>
 				</div>
 
-				<button className="flex items-center gap-space-2 text-slate-11 text-1 font-regular">
+				{/* <button onClick={() => signOut()}>Logout</button> */}
+				<button className="flex items-center gap-space-2 text-slate-11 text-1 font-regular" onClick={() => signout()}>
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path
 							d="M12.1187 12.7805C12.0487 12.7705 11.9587 12.7705 11.8787 12.7805C10.1187 12.7205 8.71875 11.2805 8.71875 9.51047C8.71875 7.70047 10.1787 6.23047 11.9987 6.23047C13.8087 6.23047 15.2787 7.70047 15.2787 9.51047C15.2687 11.2805 13.8787 12.7205 12.1187 12.7805Z"
