@@ -2,15 +2,16 @@
 
 import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 const supabase = createPagesBrowserClient();
 
 const Header = () => {
-	const searchParams = useSearchParams();
+	const params = useParams();
+	const pathname = usePathname();
 	const [userRepos, setUserRepos] = useState<any[]>([]);
-	const [activeRepoId, setRepoId] = useState(searchParams.get('repoId'));
+	const [activeRepoId] = useState(params.repo);
 
 	const userSupabaseRepos = useCallback(async () => {
 		const { data } = await supabase.from('repos').select();
@@ -24,8 +25,7 @@ const Header = () => {
 
 	useEffect(() => {
 		userSupabaseRepos();
-		setRepoId(searchParams.get('repoId'));
-	}, [searchParams, userSupabaseRepos]);
+	}, [userSupabaseRepos]);
 
 	return (
 		<header className="fixed h-full left-0 top-0 maxW-[76px] mx-auto pr-[1px] bg-[linear-gradient(180deg,rgba(212,214,215,0.43),rgba(212,214,215,0)_12%),linear-gradient(0deg,rgba(212,214,215,0.43),rgba(212,214,215,0)_12%)] bg-slate-2 z-20">
@@ -37,8 +37,14 @@ const Header = () => {
 				</div>
 
 				<div className="flex flex-col gap-space-5">
-					<button className="px-space-4 border-r border-r-slate-11 relative group/button">
-						<svg width="24" height="25" viewBox="0 0 24 25" className="stroke-slate-11" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<button className={`outline-none px-space-4 relative border-r group/button ${!pathname.includes(activeRepoId + '/settings') ? 'border-r-slate-11' : 'border-r-transparent'}`}>
+						<svg
+							width="24"
+							height="25"
+							viewBox="0 0 24 25"
+							className={`group-hover/button:stroke-slate-11 group-focus/button:stroke-slate-11 group-focus-within/button:stroke-slate-11 transition-all duration-500 ${!pathname.includes(activeRepoId + '/settings') ? 'stroke-slate-11' : 'stroke-slate-9'}`}
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg">
 							<path
 								d="M21 7.92755V17.9276C21 20.9276 19.5 22.9276 16 22.9276H8C4.5 22.9276 3 20.9276 3 17.9276V7.92755C3 4.92755 4.5 2.92755 8 2.92755H16C19.5 2.92755 21 4.92755 21 7.92755Z"
 								strokeWidth="1.5"
@@ -46,15 +52,15 @@ const Header = () => {
 								strokeLinecap="round"
 								strokeLinejoin="round"
 							/>
-							<path d="M14.5 5.42755V7.42755C14.5 8.52755 15.4 9.42755 16.5 9.42755H18.5" stroke="#ADB1B8" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-							<path d="M8 13.9276H12" stroke="#ADB1B8" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-							<path d="M8 17.9276H16" stroke="#ADB1B8" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+							<path d="M14.5 5.42755V7.42755C14.5 8.52755 15.4 9.42755 16.5 9.42755H18.5" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+							<path d="M8 13.9276H12" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+							<path d="M8 17.9276H16" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
 						</svg>
 
-						<ul className="transition-all absolute -right-36 rounded-3 top-0 bg-slate-2 shadow-1 border border-slate-4 opacity-0 -translate-x-1 pointer-events-none group-focus-within/button:opacity-100 group-focus-within/button:translate-x-0 group-focus-within/button:pointer-events-auto group-hover/button:opacity-100 group-hover/button:translate-x-0 group-hover/button:pointer-events-auto">
+						<ul className="transition-all duration-500 absolute -right-36 rounded-3 top-0 bg-slate-2 shadow-1 border border-slate-4 opacity-0 -translate-x-1 pointer-events-none group-focus-within/button:opacity-100 group-focus-within/button:translate-x-0 group-focus-within/button:pointer-events-auto group-hover/button:opacity-100 group-hover/button:translate-x-0 group-hover/button:pointer-events-auto">
 							{userRepos.map((repo, index) => (
 								<li className={`hover:bg-slate-3 transition-all duration-500 ${activeRepoId == repo.id ? 'bg-slate-3' : ''}`} key={index}>
-									<Link href={`./?repoId=${repo.id}`} className="w-full text-left py-space-2 px-space-2 text-1 text-slate-11 flex justify-between items-center group capitalize">
+									<Link href={`/${repo.name}`} className="w-full text-left py-space-2 px-space-2 text-1 text-slate-11 flex justify-between items-center group capitalize">
 										{repo.name}
 										<svg
 											width="24"
@@ -94,23 +100,23 @@ const Header = () => {
 						</ul>
 					</button>
 
-					<button className=" px-space-4">
-						<svg width="24" height="25" viewBox="0 0 24 25" className="stroke-slate-9" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<Link href={`/${activeRepoId}/settings`} className={`outline-none group/settings px-space-4 border-r ${pathname.includes(activeRepoId + '/settings') ? 'border-r-slate-11' : 'border-r-transparent'}`}>
+						<svg
+							width="24"
+							height="25"
+							viewBox="0 0 24 25"
+							className={`group-hover/settings:stroke-slate-11 group-focus/settings:stroke-slate-11 transition-all duration-500 ${pathname.includes(activeRepoId + '/settings') ? 'stroke-slate-11' : 'stroke-slate-9'}`}
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg">
 							<path
 								d="M3 10.0379V15.8079C3 17.9279 3 17.9279 5 19.2779L10.5 22.4579C11.33 22.9379 12.68 22.9379 13.5 22.4579L19 19.2779C21 17.9279 21 17.9279 21 15.8179V10.0379C21 7.9279 21 7.9279 19 6.5779L13.5 3.3979C12.68 2.9179 11.33 2.9179 10.5 3.3979L5 6.5779C3 7.9279 3 7.9279 3 10.0379Z"
 								strokeWidth="1.5"
 								strokeLinecap="round"
 								strokeLinejoin="round"
 							/>
-							<path
-								d="M12 15.9276C13.6569 15.9276 15 14.5844 15 12.9276C15 11.2707 13.6569 9.92755 12 9.92755C10.3431 9.92755 9 11.2707 9 12.9276C9 14.5844 10.3431 15.9276 12 15.9276Z"
-								stroke="#696E77"
-								strokeWidth="1.5"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							/>
+							<path d="M12 15.9276C13.6569 15.9276 15 14.5844 15 12.9276C15 11.2707 13.6569 9.92755 12 9.92755C10.3431 9.92755 9 11.2707 9 12.9276C9 14.5844 10.3431 15.9276 12 15.9276Z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 						</svg>
-					</button>
+					</Link>
 				</div>
 
 				{/* <button onClick={() => signOut()}>Logout</button> */}

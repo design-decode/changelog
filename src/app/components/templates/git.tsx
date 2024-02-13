@@ -4,12 +4,15 @@ import Avatar from '../../../../public/img/avatar.png';
 import Link from 'next/link';
 import Tag from '../tag';
 import { HTMLAttributes } from 'react';
+import { format } from 'date-fns';
 
 const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: any }) => {
+	const date = (date: string) => format(new Date(date), 'd LLL, yyyy');
+
 	return (
 		<div {...props} className="flex gap-space-7 w-full">
 			<div className="text-2 font-regular w-[88px] sticky top-0 flex flex-col gap-space-4">
-				<div className=" text-slate-11">{data.published_at}</div>
+				<div className=" text-slate-11">{date(data.published_at)}</div>
 				<div className="text-slate-10">{data.tag_name}</div>
 				<div className="text-indigoA-11 flex items-center gap-space-1">
 					<svg width="16" height="8" viewBox="0 0 16 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,7 +44,7 @@ const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: a
 
 			<div className="max-w-[600px] border-b border-b-indigoA-4 pb-space-4">
 				<div className="flex justify-between">
-					<Tag name="improvement" />
+					<Tag name={data?.tag ? 'improvement' : 'update'} />
 
 					<button>
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -54,7 +57,7 @@ const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: a
 					</button>
 				</div>
 
-				<h2 className="text-slate-12 text-5 font-bold mb-space-4">New: Events Transformation</h2>
+				<h2 className="text-slate-12 text-5 font-bold mb-space-4">{data.name}</h2>
 				<p className="font-regular text-1.1 text-slate-11 mb-space-4">
 					This is where our enhanced insider reports pages come in handy. The improved filtering and color-coded symbols allow you to track and interpret this insider trading activity more easily, leading to more informed investment decisions. As always, we strive to
 					equip you with the most accurate and accessible financial information, so you can invest confidently.

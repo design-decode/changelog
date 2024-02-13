@@ -18,12 +18,14 @@ type SETUP_STATES = 'repo' | 'template' | 'details';
 export default function Home() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const repoId = searchParams.get('repoId');
 	const [installation_id, setInstallationId] = useState(searchParams.get('installation_id'));
 
 	const [uiState, setUiState] = useState<SETUP_STATES>((searchParams.get('state') as SETUP_STATES) || 'repo');
 	const [askForInstallation, setInstallationStatus] = useState<boolean>(true);
 	const routeAction = searchParams.get('setup_action');
 	const [userRepos, setRepos] = useState<any[]>([]);
+	const [supabaseRepos, setSupabaseRepos] = useState<any[]>([]);
 	const [pageIsLoading, setPageLoader] = useState<boolean>(true);
 
 	const [searchTerm, setSearchTerm] = useState('');
@@ -32,27 +34,20 @@ export default function Home() {
 
 	const updateUserInstallationId = useCallback(async () => await supabase.auth.updateUser({ data: { installation_id } }), [installation_id]);
 
-	const getUser = async (): Promise<User | null> => {
-		const data = await supabase.auth.getUser();
-		return data.data.user;
-	};
+	// const getUser = async (): Promise<User | null> => {
+	// 	const data = await supabase.auth.getUser();
+	// 	return data.data.user;
+	// };
 
 	const getRepos = useCallback(async () => {
 		const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/repositories/github', {
-			method: 'POST',
+			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ installation_id })
+			}
 		});
 		const data = await response.json();
 		return data;
-	}, [installation_id]);
-
-	const getUserInstallationId = useCallback(async () => {
-		const installation_id = (await getUser())?.user_metadata.installation_id;
-		if (installation_id) setInstallationId(installation_id);
-		return;
 	}, []);
 
 	const handleRepoSearch = useCallback(
@@ -68,29 +63,52 @@ export default function Home() {
 
 	const handleRepoDetailSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		const repoId = searchParams.get('repoId');
-		const { error } = await supabase.from('repos').update(repoDetailsForm).eq('id', repoId);
-		if (!error) return router.push(`/?repoId=${repoId}`);
+		const { error } = await supabase.from('repos').update(repoDetailsForm).eq('name', repoId);
+		if (!error) return router.push(`/${repoId}`);
 	};
 
-	const createRepoSupabase = async (repoDetails: any) => {
-		const { data: repoData } = await supabase
-			.from('repos')
-			.insert([{ name: repoDetails.name }])
-			.select();
-		if (repoData) {
-			router.push(`/setup?state=template&repoId=${repoData[0].id}`);
-			setUiState('template');
-		}
+	const getReleases = useCallback(async (repoName: string) => {
+		const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/releases/github/all', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ repo: repoName })
+		});
+		const res = await response.json();
+		return res;
+	}, []);
+
+	const createSupabaseReleases = async (releases: any[], repo: string) => {
+		const supabaseReleases = releases.map(release => ({ name: release.name, assets_url: release.assets_url, draft: release.draft, prerelease: release.prerelease, github_link: release.html_url, body: release.body, tag_name: release.tag_name, repo }));
+		await supabase.from('releases').insert(supabaseReleases);
+		return;
+	};
+
+	const setupRepo = async (repoDetails: any) => {
+		const { data: repoData } = await supabase.from('repos').insert({ name: repoDetails.name }).select();
+
+		if (!repoData) return;
+
+		const githubReleases = await getReleases(repoDetails.name);
+		await createSupabaseReleases(githubReleases.data, repoDetails.name);
+
+		router.push(`/setup?state=template&repoId=${repoDetails.name}`);
+		setUiState('template');
 		return;
 	};
 
 	const updateRepoTemplate = async (templateId: number) => {
-		const repoId = searchParams.get('repoId');
-		await supabase.from('repos').update({ template_id: templateId }).eq('id', repoId);
+		await supabase.from('repos').update({ template_id: templateId }).eq('name', repoId);
 		router.push(`?state=details&repoId=${repoId}`);
 		setUiState('details');
 	};
+
+	const getSupabaseRepos = useCallback(async () => {
+		const { data } = await supabase.from('repos').select();
+		if (data) setSupabaseRepos(data);
+		return;
+	}, []);
 
 	// check if user has existing repo on supabase
 	const userSupabaseRepos = async () => {
@@ -100,18 +118,14 @@ export default function Home() {
 
 	const initSetup = useCallback(async () => {
 		setPageLoader(true);
-
-		// check user has supabase repo
-		// const supabaseRepos = await userSupabaseRepos();
-		// if (supabaseRepos && supabaseRepos?.length > 0) return router.push('/');
-
-		// check installation id
 		if (routeAction == 'install' && installation_id) await updateUserInstallationId();
-		else await getUserInstallationId();
 
-		// make sure installation id exists before getting repos from github
-		if (!installation_id) return setInstallationStatus(false);
 		const reposResponse = await getRepos();
+		if (!reposResponse?.data?.repositories || reposResponse?.data?.repositories?.length == 0) {
+			setPageLoader(false);
+			return setInstallationStatus(false);
+		}
+		await getSupabaseRepos();
 
 		if (reposResponse.error) setInstallationStatus(true);
 		if (reposResponse.data?.repositories) {
@@ -121,7 +135,12 @@ export default function Home() {
 		}
 
 		setPageLoader(false);
-	}, [getRepos, getUserInstallationId, installation_id, routeAction, router, updateUserInstallationId]);
+	}, [getRepos, getSupabaseRepos, installation_id, routeAction, updateUserInstallationId]);
+
+	const isRepoExistingSupabase = (repoName: string): boolean => {
+		const repoExists = supabaseRepos.find(repo => repo.name == repoName);
+		return !!repoExists;
+	};
 
 	useEffect(() => {
 		initSetup();
@@ -216,8 +235,8 @@ export default function Home() {
 											)}
 										</div>
 
-										<button className="bg-slate-4 text-slate-11 text-1 font-regular flex items-center gap-space-1 h-space-5 px-space-2 rounded-3" onClick={() => createRepoSupabase(repo)}>
-											Setup
+										<button className="bg-slate-4 text-slate-11 text-1 font-regular flex items-center gap-space-1 h-space-5 px-space-2 rounded-3" onClick={() => setupRepo(repo)}>
+											{isRepoExistingSupabase(repo.name) ? 'Configure' : 'Setup'}
 											<svg width="24" height="20" viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 												<g clipPath="url(#clip0_155_1376)">
 													<path d="M8 16H5.43C3.14 16 2 14.86 2 12.57V5.43C2 3.14 3.14 2 5.43 2H10C12.29 2 13.43 3.14 13.43 5.43" className="stroke-slate-6" strokeLinecap="round" strokeLinejoin="round" />

@@ -1,54 +1,18 @@
-'use client';
-
 import DefaultTemplate from '../components/templates/default';
 import { GitTemplate } from '../components/templates/git';
 import DateTemplate from '../components/templates/date';
-import { useSearchParams } from 'next/navigation';
 
-import { useCallback, useEffect, useState } from 'react';
-import { User, createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
+
 const supabase = createPagesBrowserClient();
 
-export default function Home() {
-	const searchParams = useSearchParams();
-	const [releases, setReleases] = useState<any[]>([]);
+const getReleases = async (repoId: string) => {
+	const { data, error } = await supabase.from('releases').select().eq('repo', repoId);
+	return { data, error };
+};
 
-	const getUser = async (): Promise<User | null> => {
-		const data = await supabase.auth.getUser();
-		return data.data.user;
-	};
-
-	const getUserInstallationId = useCallback(async () => {
-		const installation_id = (await getUser())?.user_metadata.installation_id;
-		return installation_id;
-	}, []);
-
-	const getRepo = useCallback(async () => {
-		const repoId = searchParams.get('repoId');
-		const { data } = await supabase.from('repos').select().eq('id', repoId);
-		if (data) return data[0];
-	}, [searchParams]);
-
-	const getReleases = useCallback(async () => {
-		const { data } = await supabase.auth.getUser();
-		const installation_id = await getUserInstallationId();
-		const repoDetails = await getRepo();
-
-		const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/releases/github', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ owner: data.user?.user_metadata.user_name, repo: repoDetails.name, installation_id })
-		});
-		const res = await response.json();
-		setReleases(res.data);
-		return res;
-	}, [getRepo, getUserInstallationId]);
-
-	useEffect(() => {
-		getReleases();
-	}, [getReleases]);
+export default async function Home({ searchParams }: { searchParams: { [key: string]: string } }) {
+	const { data, error } = await getReleases(searchParams.repoId);
 
 	return (
 		<main className="">
@@ -69,9 +33,7 @@ export default function Home() {
 				</div>
 				<article className="mt-space-7 flex flex-col gap-space-9">
 					{/* <DateTemplate /> */}
-					{releases.map(release => (
-						<GitTemplate data="release" key={release.id} />
-					))}
+					{data && data.map(release => <GitTemplate data={release} key={release.id} />)}
 
 					{/* <DefaultTemplate />
 					<DefaultTemplate />
