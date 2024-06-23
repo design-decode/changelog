@@ -1,20 +1,27 @@
-import Image from 'next/image';
-import SampleImage from '../../../../public/img/sample1.png';
-import Avatar from '../../../../public/img/avatar.png';
 import Link from 'next/link';
 import Tag from '../tag';
-import { HTMLAttributes } from 'react';
-import { format } from 'date-fns';
+import React, { HTMLAttributes } from 'react';
+import { DeleteButton } from '../delete';
+import { date } from '../date';
 
-const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: any }) => {
-	const date = (date: string) => format(new Date(date), 'd LLL, yyyy');
-
+export const GitTemplate = ({ data, canEdit, pageId, ...props }: HTMLAttributes<HTMLElement> & { pageId: string; data: any; canEdit?: boolean }) => {
 	return (
-		<div {...props} className="flex gap-space-7 w-full">
-			<div className="text-2 font-regular w-[88px] sticky top-0 flex flex-col gap-space-4">
-				<div className=" text-slate-11">{date(data.published_at)}</div>
-				<div className="text-slate-10">{data.tag_name}</div>
-				<div className="text-indigoA-11 flex items-center gap-space-1">
+		<div {...props} className="flex gap-space-7 w-full mb-10 pb-4">
+			<div className="text-2 font-regular w-[88px] self-start sticky top-10 flex flex-col gap-space-4 mt-2">
+				<div className="text-slate-11">{date(data.published_at)}</div>
+				<div className="text-slate-11 flex items-center gap-space-1">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="stroke-slate-11 scale-75" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M4.17038 15.2998L8.70038 19.8298C10.5604 21.6898 13.5804 21.6898 15.4504 19.8298L19.8404 15.4398C21.7004 13.5798 21.7004 10.5598 19.8404 8.6898L15.3004 4.1698C14.3504 3.2198 13.0404 2.7098 11.7004 2.7798L6.70038 3.0198C4.70038 3.1098 3.11038 4.6998 3.01038 6.6898L2.77038 11.6898C2.71038 13.0398 3.22038 14.3498 4.17038 15.2998Z"
+							strokeWidth="1.5"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						/>
+						<path d="M9.49988 12C10.8806 12 11.9999 10.8807 11.9999 9.5C11.9999 8.11929 10.8806 7 9.49988 7C8.11917 7 6.99988 8.11929 6.99988 9.5C6.99988 10.8807 8.11917 12 9.49988 12Z" strokeWidth="1.5" strokeLinecap="round" />
+					</svg>
+					{data.tag_name}
+				</div>
+				{/* <div className="text-indigoA-11 flex items-center gap-space-1">
 					<svg width="16" height="8" viewBox="0 0 16 8" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path
 							fillRule="evenodd"
@@ -39,36 +46,23 @@ const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: a
 						<path d="M10.6667 8.00016H6.00001C4.53334 8.00016 3.33334 7.3335 3.33334 5.3335V10.6668" stroke="#99A2FF" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
 					</svg>
 					v1.3.2
-				</div>
+				</div> */}
 			</div>
 
-			<div className="max-w-[600px] border-b border-b-indigoA-4 pb-space-4">
-				<div className="flex justify-between">
-					<Tag name={data?.tag ? 'improvement' : 'update'} />
+			<div className="max-w-[600px] w-full border-b border-b-slate-3 pb-space-4 relative">
+				{data?.tag && <Tag name="bug fix" />}
 
-					<button>
-						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M14 3.98696C11.78 3.76696 9.54667 3.65363 7.32 3.65363C6 3.65363 4.68 3.72029 3.36 3.85363L2 3.98696" fill="#C62A2F" />
-							<path d="M5.66675 3.31331L5.81341 2.43998C5.92008 1.80665 6.00008 1.33331 7.12675 1.33331H8.87341C10.0001 1.33331 10.0867 1.83331 10.1867 2.44665L10.3334 3.31331" stroke="#C62A2F" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
-							<path d="M12.5657 6.09308L12.1324 12.8064C12.059 13.8531 11.999 14.6664 10.139 14.6664H5.85904C3.99904 14.6664 3.93904 13.8531 3.86571 12.8064L3.43237 6.09308" stroke="#C62A2F" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
-							<path d="M6.8855 11H9.1055" stroke="#C62A2F" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
-							<path d="M6.33325 8.33331H9.66659" stroke="#C62A2F" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
-						</svg>
-					</button>
-				</div>
+				{canEdit && <DeleteButton className="absolute" postId={data.id} pageId={pageId} />}
 
-				<h2 className="text-slate-12 text-5 font-bold mb-space-4">{data.name}</h2>
-				<p className="font-regular text-1.1 text-slate-11 mb-space-4">
-					This is where our enhanced insider reports pages come in handy. The improved filtering and color-coded symbols allow you to track and interpret this insider trading activity more easily, leading to more informed investment decisions. As always, we strive to
-					equip you with the most accurate and accessible financial information, so you can invest confidently.
-				</p>
-				<Image src={SampleImage} alt="sample1" className="w-full mb-space-4" />
-				<p className="font-regular text-1.1 text-slate-11 mb-space-4">
-					This is where our enhanced insider reports pages come in handy. The improved filtering and color-coded symbols allow you to track and interpret this insider trading activity more easily, leading to more informed investment decisions. As always, we strive to
-					equip you with the most accurate and accessible financial information, so you can invest confidently.
-				</p>
+				<h2 className="text-slate-11 text-6 font-bold mb-space-6">
+					<Link prefetch href={`/${pageId}/${data.title}`}>
+						{data.title}
+					</Link>
+				</h2>
 
-				<div className="mt-space-6 flex justify-between items-center">
+				<div className="foreign-html line-clamp-6" dangerouslySetInnerHTML={{ __html: data.body }}></div>
+
+				{/* <div className="mt-space-6 flex justify-between items-center">
 					<ul className="flex">
 						<li>
 							<Image src={Avatar} alt="github picture" priority width={32} height={32} placeholder="blur" />
@@ -78,7 +72,7 @@ const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: a
 						</li>
 					</ul>
 
-					<Link className="text-slate-12 flex gap-space-1 items-center font-regular text-1 h-space-6 px-space-3 rounded-6 bg-slate-4 border border-slate-8" href={'./'}>
+					<Link prefetch className="text-slate-12 flex gap-space-1 items-center font-regular text-1 h-space-6 px-space-3 rounded-6 bg-slate-4 border border-slate-8" href={'./'}>
 						Read more
 						<svg width="16" height="16" viewBox="0 0 16 16" className="fill-slate-11" xmlns="http://www.w3.org/2000/svg">
 							<rect width="16" height="16" fill="white" fillOpacity="0.01" />
@@ -89,10 +83,8 @@ const GitTemplate = ({ data, ...props }: HTMLAttributes<HTMLElement> & { data: a
 							/>
 						</svg>
 					</Link>
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);
 };
-
-export { GitTemplate };

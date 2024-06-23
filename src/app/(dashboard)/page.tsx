@@ -1,45 +1,72 @@
-import DefaultTemplate from '../components/templates/default';
-import { GitTemplate } from '../components/templates/git';
-import DateTemplate from '../components/templates/date';
+import { createClient } from '@/utils/supabase/server';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { randomString } from '../../utils/rondom';
+import { headers } from 'next/headers';
+export const revalidate = 0;
 
-import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
+const supabase = createClient();
 
-const supabase = createPagesBrowserClient();
-
-const getReleases = async (repoId: string) => {
-	const { data, error } = await supabase.from('releases').select().eq('repo', repoId);
-	return { data, error };
+const SiteError = () => {
+	return (
+		<div className="w-full h-screen flex items-center justify-center font-bold text-2 flex-col gap-4">
+			<p className="text-2 text-slate-12 font-regular">Unable to fetch site details, please reload page</p>
+		</div>
+	);
 };
 
-export default async function Home({ searchParams }: { searchParams: { [key: string]: string } }) {
-	const { data, error } = await getReleases(searchParams.repoId);
+export default async function Home({ ...props }: { params: { [key: string]: string } }) {
+	const header = headers();
+	const sitePrefix = header.get('host')?.split('.')[0];
 
-	return (
-		<main className="">
-			<section className="mt-space-9 max-w-[727px] mx-auto">
-				<div className="border-b border-b-slate-3 flex justify-end pb-space-3">
-					<button className="">
-						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" fill="#696E77" />
-							<path
-								d="M1.3335 8.58697V7.41364C1.3335 6.7203 1.90016 6.14697 2.60016 6.14697C3.80683 6.14697 4.30016 5.29364 3.6935 4.24697C3.34683 3.64697 3.5535 2.86697 4.16016 2.5203L5.3135 1.8603C5.84016 1.54697 6.52016 1.73364 6.8335 2.2603L6.90683 2.38697C7.50683 3.43364 8.4935 3.43364 9.10016 2.38697L9.1735 2.2603C9.48683 1.73364 10.1668 1.54697 10.6935 1.8603L11.8468 2.5203C12.4535 2.86697 12.6602 3.64697 12.3135 4.24697C11.7068 5.29364 12.2002 6.14697 13.4068 6.14697C14.1002 6.14697 14.6735 6.71364 14.6735 7.41364V8.58697C14.6735 9.2803 14.1068 9.85364 13.4068 9.85364C12.2002 9.85364 11.7068 10.707 12.3135 11.7536C12.6602 12.3603 12.4535 13.1336 11.8468 13.4803L10.6935 14.1403C10.1668 14.4536 9.48683 14.267 9.1735 13.7403L9.10016 13.6136C8.50016 12.567 7.5135 12.567 6.90683 13.6136L6.8335 13.7403C6.52016 14.267 5.84016 14.4536 5.3135 14.1403L4.16016 13.4803C3.5535 13.1336 3.34683 12.3536 3.6935 11.7536C4.30016 10.707 3.80683 9.85364 2.60016 9.85364C1.90016 9.85364 1.3335 9.2803 1.3335 8.58697Z"
-								stroke="#696E77"
-								strokeMiterlimit="10"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							/>
-						</svg>
-					</button>
-				</div>
-				<article className="mt-space-7 flex flex-col gap-space-9">
-					{/* <DateTemplate /> */}
-					{data && data.map(release => <GitTemplate data={release} key={release.id} />)}
+	// get user auth details
+	// const {
+	// 	data: { user }
+	// } = await supabase.auth.getUser();
 
-					{/* <DefaultTemplate />
-					<DefaultTemplate />
-					<DefaultTemplate /> */}
-				</article>
-			</section>
-		</main>
-	);
+	// function for: all users must have one site data, if they don't have, create one automatically
+	// const getSiteData = async () => {
+	// 	const sitesResponse = await supabase.from('sites').select('prefix').eq('user', user?.id);
+
+	// 	if (sitesResponse.error || sitesResponse.data.length) return sitesResponse;
+
+	// 	const res = await supabase
+	// 		.from('sites')
+	// 		.insert({ name: `${user?.user_metadata.full_name}'s Site`, prefix: `${user?.user_metadata.full_name.replace(/\s+/g, '-').toLowerCase()}-${randomString()}` })
+	// 		.select('prefix');
+	// 	return res;
+	// };
+	// const { data: siteData, error: siteError } = await getSiteData();
+
+	// if site method returned any error, show error component
+	// if (siteError) return <SiteError />;
+
+	// Since there is a site for user, get user's default page
+	const { data, error } = await supabase.from('pages').select('page_slug').eq('site', sitePrefix).eq('default', true);
+
+	// function for: automatically create new portfolio page for user if user does not have a page yet
+	const createDefaultPage = async () => {
+		const res = await supabase.from('pages').insert({ name: 'Home', page_slug: 'home', site: sitePrefix, description: 'Portfolio page description', type: 'portfolio', template: 'default', title: 'My portfolio', default: true }).select('page_slug');
+		return res;
+	};
+
+	// if user does not have any page, automatically create default portfolio page and open it.
+	if (!error && !data.length) {
+		const { data: newPage, error: newPageError } = await createDefaultPage();
+		return !newPageError ? redirect(`/${newPage[0].page_slug}`) : <SiteError />;
+	}
+
+	// code for page empty state
+	// <div className="w-full h-screen flex items-center justify-center font-bold text-2 flex-col gap-4">
+	// 	<p className="text-2 text-slate-12 font-regular">You do not have any page yet</p>
+	// 	<Link prefetch className="bg-slate-12 py-2 px-4 text-2 drop-shadow-md rounded-4 font-regular" href={`/new`}>
+	// 		Create Page
+	// 	</Link>
+	// </div>
+
+	// if user has a page, automatically redirect them to the default page.
+	if (!error && data.length) redirect(`/${data[0].page_slug}`);
+
+	// if any error, show error component;
+	return <SiteError />;
 }

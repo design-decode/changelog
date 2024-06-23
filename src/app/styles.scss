@@ -1,0 +1,139 @@
+.tiptap {
+	@apply min-h-[70vh];
+}
+
+.tiptap,
+.foreign-html {
+	@apply text-slate-11 outline-none;
+
+	> * + * {
+		margin-top: 0.75em;
+	}
+
+	ul,
+	ol {
+		@apply px-4 list-disc;
+
+		li {
+			@apply my-3;
+		}
+	}
+
+	h1 {
+		@apply text-slate-11 text-6 font-medium mb-space-5 relative;
+	}
+
+	h2 {
+		@apply text-slate-11 text-5 font-medium mb-space-4 mt-2;
+	}
+
+	h3 {
+		@apply text-slate-11 text-3 font-medium mb-space-4 mt-2;
+	}
+
+	h4 {
+		@apply text-slate-11 text-2 font-medium mb-space-4 mt-2;
+	}
+
+	h5,
+	h6 {
+		@apply text-slate-11 text-1 font-medium mb-space-3 mt-2;
+	}
+
+	p {
+		@apply text-2 text-slate-11 font-regular mt-3 mb-4 leading-5;
+	}
+
+	p.is-editor-empty:first-child::before {
+		color: #adb5bd;
+		content: attr(data-placeholder);
+		float: left;
+		height: 0;
+		pointer-events: none;
+	}
+}
+
+.react-grid-item .tiptap,
+.bio .tiptap,
+.bio-text {
+	@apply min-h-full h-full;
+
+	h1 {
+		@apply text-slate-11 text-8 font-bold mb-space-2 relative;
+	}
+
+	h2 {
+		@apply text-slate-11 text-7 font-bold mb-space-2 mt-0;
+	}
+
+	h3 {
+		@apply text-slate-11 text-6 font-bold mb-space-2 mt-0;
+	}
+
+	h4 {
+		@apply text-slate-11 text-5 font-bold mb-space-2 mt-0;
+	}
+
+	h5,
+	h6 {
+		@apply text-slate-11 text-4 font-bold mb-space-2 mt-0;
+	}
+
+	p {
+		@apply text-3 text-slate-11 font-regular mt-0 mb-2 leading-5;
+	}
+}
+
+.bio {
+	@apply p-0 bg-none mt-2 rounded-[0px];
+	background: none !important;
+
+	.tiptap {
+		p {
+			font-weight: 400;
+		}
+		strong {
+			@apply text-slate-12;
+		}
+	}
+}
+
+.bubble-menu,
+.floating-menu {
+	@apply bg-slate-3 flex text-slate-12 p-1 rounded-4;
+
+	button {
+		@apply p-1 font-bold opacity-50 text-1;
+
+		&:hover,
+		&.is-active {
+			@apply opacity-100;
+		}
+	}
+}
+
+.floating-menu {
+	@apply mb-16;
+}
+
+.react-grid-item {
+	&:hover > .react-resizable-handle {
+		@apply opacity-100 pointer-events-auto;
+	}
+
+	&.hide-handle > .react-resizable-handle {
+		opacity: 0;
+	}
+
+	& > .react-resizable-handle {
+		@apply pointer-events-none;
+
+		&.react-resizable-handle-se {
+			@apply w-16 h-16 scale-75 bg-none before:absolute after:w-4 before:w-2 after:border-none after:bg-slate-8 before:bg-slate-8 after:-bottom-2 before:-right-2 after:h-2 before:h-4 after:rounded-[20px] before:rounded-[20px] after:-left-3 before:-top-3 [background-size:16px_16px] -right-4 -bottom-4 border-8 border-slate-8 border-t-transparent border-l-transparent rounded-ee-[58px] hover:scale-90 transition-all duration-500;
+		}
+	}
+}
+
+.react-grid-item.react-grid-placeholder {
+	@apply bg-slateA-10 rounded-[35px] transition-all duration-500 -z-10;
+}

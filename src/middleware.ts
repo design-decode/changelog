@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { updateSession } from './utils/supabase/middleware';
 
 export async function middleware(req: NextRequest) {
-	const res = NextResponse.next();
-	const supabase = createMiddlewareClient({ req, res });
+	// const res = NextResponse.next();
+	// const supabase = createMiddlewareClient({ req, res });
 
-	const {
-		data: { user }
-	} = await supabase.auth.getUser();
+	// const {
+	// 	data: { user }
+	// } = await supabase.auth.getUser();
 
-	if (user && req.nextUrl.pathname === '/auth') {
-		return NextResponse.redirect(new URL('/', req.url));
-	}
+	// if (user && req.nextUrl.pathname === '/auth') {
+	// 	return NextResponse.redirect(new URL('/', req.url));
+	// }
 
-	if (!user && req.nextUrl.pathname === '/') {
-		return NextResponse.redirect(new URL('/auth', req.url));
-	}
+	// if (!user && req.nextUrl.pathname === '/') {
+	// 	return NextResponse.redirect(new URL('/auth', req.url));
+	// }
 
-	return res;
+	return await updateSession(req);
 }
 
 // Ensure the middleware is only called for relevant paths.

@@ -1,9 +1,12 @@
 import './globals.scss';
 import '@radix-ui/themes/styles.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Karla } from 'next/font/google';
+import '/node_modules/react-grid-layout/css/styles.css';
+import '/node_modules/react-resizable/css/styles.css';
+import './styles.scss';
 
-const inter = Inter({ subsets: ['latin'] });
+const karla = Karla({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
 	title: 'Create Next App',
@@ -12,10 +15,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
-			<body className={`${inter.className} round bg-slate-1 pb-space-9 dark`} suppressHydrationWarning={true}>
+		<html lang="en" className="">
+			<body className={`${karla.className} round bg-slate-1 dark`} suppressHydrationWarning={true}>
 				{children}
 			</body>
 		</html>
 	);
 }
+
+// mr-[calc(-1*(100vw-100%))]

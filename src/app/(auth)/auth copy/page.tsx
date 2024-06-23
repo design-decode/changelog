@@ -1,18 +1,18 @@
 'use client';
 
-import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
-const supabase = createPagesBrowserClient();
+import { createClient } from '../../../utils/supabase/client';
+const supabase = createClient();
 
 const AuthPage = () => {
 	async function signInWithGithub() {
 		await supabase.auth.signInWithOAuth({
-			provider: 'github',
-			options: { redirectTo: 'http://localhost:3000/setup' }
+			provider: 'google',
+			options: { redirectTo: 'http://localhost:3000/auth/callback' }
 		});
 	}
 
 	return (
-		<main className="flex flex-col justify-center items-center mt-[200px] max-w-[281px] mx-auto text-center gap-space-6">
+		<main className="flex flex-col justify-center items-center mt-[300px] max-w-[281px] mx-auto text-center gap-space-6">
 			<div>
 				<h2 className="font-medium text-3 text-slate-12">Welcome to Tally</h2>
 				<p className="text-slate-11 text-1 mt-space-1">Get started with making your Github product log even prettier.</p>

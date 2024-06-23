@@ -1,5 +1,5 @@
 import { DialogHTMLAttributes, FormEvent, MouseEventHandler, Ref } from 'react';
-import Input from '../../../components/input';
+import Input from '../../components/input';
 import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
 
 const supabase = createPagesBrowserClient();

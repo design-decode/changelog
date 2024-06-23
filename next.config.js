@@ -1,8 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: false,
-	experimental: {
-		serverActions: true
+	images: {
+		domains: ['github.com'],
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: '**.supabase.co',
+				port: ''
+			}
+		]
 	}
 };
 

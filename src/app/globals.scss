@@ -51,8 +51,30 @@
 	--font-size-8: calc(35px * var(--scaling));
 	--font-size-9: calc(60px * var(--scaling));
 
+	--line-height-1: calc(16px * var(--scaling));
+	--line-height-2: calc(20px * var(--scaling));
+	--line-height-3: calc(24px * var(--scaling));
+	--line-height-4: calc(26px * var(--scaling));
+	--line-height-5: calc(28px * var(--scaling));
+	--line-height-6: calc(30px * var(--scaling));
+	--line-height-7: calc(36px * var(--scaling));
+	--line-height-8: calc(40px * var(--scaling));
+	--line-height-9: calc(60px * var(--scaling));
+
 	--font-weight-light: 300;
 	--font-weight-regular: 400;
 	--font-weight-medium: 500;
 	--font-weight-bold: 700;
+}
+
+@layer utilities {
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+	/* Hide scrollbar for IE, Edge and Firefox */
+	.no-scrollbar {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
 }

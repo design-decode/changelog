@@ -15,7 +15,7 @@ export default function Tag({ name }: { name: type }) {
 		}
 	};
 	return (
-		<div className={`bg-${color(name)}-3 py-space-1 px-space-2 rounded-1 text-${color(name)}-11 w-fit flex items-center gap-space-1 text-1 fontLight mb-space-4`}>
+		<div className={`bg-${color(name)}-2 py-space-2 px-space-3 rounded-6 text-${color(name)}-11 w-fit h-fit flex items-center gap-space-1 text-1 font-light mb-space-5`}>
 			{name === 'improvement' && (
 				<svg width="12" height="12" fill="none" viewBox="0 0 12 12" className="stroke-indigoA-11" xmlns="http://www.w3.org/2000/svg">
 					<path
@@ -27,6 +27,7 @@ export default function Tag({ name }: { name: type }) {
 					/>
 				</svg>
 			)}
+
 			{name === 'update' && (
 				<svg width="12" height="12" className={`stroke-${color(name)}-11`} viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path
@@ -42,6 +43,7 @@ export default function Tag({ name }: { name: type }) {
 					<path d="M9.75 6.72L10.5 6.5L10.28 7.25L10.5 8L9.75 7.78L9 8L9.22 7.25L9 6.5L9.75 6.72Z" strokeOpacity="0.823" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
 				</svg>
 			)}
+
 			{name === 'bug fix' && (
 				<svg width="12" height="12" viewBox="0 0 12 12" className={`stroke-${color(name)}-11`} fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M6 3.875V6.5" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />

@@ -1,6 +1,6 @@
 'use client';
 
-import Header from '../../components/header';
+import Header from '../../components/header/header';
 import Template1 from '../../../../public/img/template1.png';
 import Image from 'next/image';
 import Input from '../../components/input';
@@ -11,6 +11,7 @@ import { useSearchParams } from 'next/navigation';
 import { User, UserResponse } from '@supabase/supabase-js';
 import { Loader } from '@/app/components/page-loader';
 import { useRouter } from 'next/navigation';
+import { parse, transform, renderers } from '@markdoc/markdoc';
 
 const supabase = createPagesBrowserClient();
 type SETUP_STATES = 'repo' | 'template' | 'details';
@@ -79,16 +80,26 @@ export default function Home() {
 		return res;
 	}, []);
 
+	const parseMarkdown = (markdown: string): string => {
+		if (!markdown) '';
+
+		const parsed = parse(markdown);
+		const transformed = transform(parsed /* config */);
+		const html = renderers.html(transformed);
+
+		return html;
+	};
+
 	const createSupabaseReleases = async (releases: any[], repo: string) => {
-		const supabaseReleases = releases.map(release => ({ name: release.name, assets_url: release.assets_url, draft: release.draft, prerelease: release.prerelease, github_link: release.html_url, body: release.body, tag_name: release.tag_name, repo }));
+		const supabaseReleases = releases.map(release => ({ id: release.id, name: release.name, assets_url: release.assets_url, draft: release.draft, prerelease: release.prerelease, github_link: release.html_url, body: release.body, tag_name: release.tag_name, repo }));
 		await supabase.from('releases').insert(supabaseReleases);
 		return;
 	};
 
 	const setupRepo = async (repoDetails: any) => {
-		const { data: repoData } = await supabase.from('repos').insert({ name: repoDetails.name }).select();
+		const { error } = await supabase.from('repos').insert({ name: repoDetails.name, private: repoDetails.private });
 
-		if (!repoData) return;
+		if (error) return;
 
 		const githubReleases = await getReleases(repoDetails.name);
 		await createSupabaseReleases(githubReleases.data, repoDetails.name);
@@ -163,7 +174,7 @@ export default function Home() {
 						</div>
 
 						{/* search repos */}
-						<div className="flex items-center bg-slateA-3 border-slate-4 border rounded-2 px-space-1  mb-space-5 has-[:focus]:border-slate-7 has-[:focus]:bg-slateA-4 duration-500 has-[:focus]:shadow-6 transition-all">
+						<div className="flex items-center bg-slateA-3 border-slate-4 border rounded-2 px-space-1 mb-space-5 has-[:focus]:border-slate-7 has-[:focus]:bg-slateA-4 duration-500 has-[:focus]:shadow-6 transition-all">
 							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="stroke-slate-11 mx-space-2 my-space-2" xmlns="http://www.w3.org/2000/svg">
 								<path d="M13.3334 7.33331C13.3334 10.6466 10.6467 13.3333 7.33337 13.3333C4.02004 13.3333 1.33337 10.6466 1.33337 7.33331C1.33337 4.01998 4.02004 1.33331 7.33337 1.33331" strokeLinecap="round" strokeLinejoin="round" />
 								<path d="M12.619 13.7932C12.9723 14.8599 13.779 14.9665 14.399 14.0332C14.9657 13.1799 14.5923 12.4799 13.5657 12.4799C12.8057 12.4732 12.379 13.0665 12.619 13.7932Z" strokeLinecap="round" strokeLinejoin="round" />
